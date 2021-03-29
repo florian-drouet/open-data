@@ -1,53 +1,24 @@
-import datetime
 import pandas as pd
-
-class anonymous:
-    
-    def __init__(self):
-        self.df_k = pd.DataFrame()
-        self.df_l = pd.DataFrame()
-        self.sizes = dict()
-        self.execution_times = dict()
-        
-    def k_anonymous(self, dataframe, columns_k, k):
-        begin = datetime.datetime.now()
-        sizing = (dataframe.groupby(columns_k).size()>=k)
-        k_inner_merge = sizing.loc[sizing==True].reset_index()
-        self.df_k = pd.merge(df, k_inner_merge[columns_k], how="inner", on=columns_k)
-        self.sizes['k_anonymisation (%)'] = 100-round(((len(dataframe)-len(self.df_k))/len(dataframe))*100)
-        self.execution_times['k_anonymisation'] = f"K-anonymisation runtime is : {((datetime.datetime.now()-begin).microseconds)/1000}ms"
-    
-    def l_diversity(self, column_l, columns_k, l):
-        begin = datetime.datetime.now()
-        sizing = (self.df_k.groupby(columns_k).nunique()>=l).reset_index()
-        l_inner_merge = sizing.loc[sizing[f'{column_l}']]
-        self.df_l = pd.merge(self.df_k, l_inner_merge[columns_k], how="inner", on=columns_k)        
-        
-        if len(self.df_k) == 0:
-            raise Exception("K-anonymous dataset is empty")
-        else:
-            self.sizes['l_diversity (%)'] = 100-round(((len(self.df_k)-len(self.df_l))/len(self.df_k))*100)
-            self.execution_times['l_diversity'] = f"L-diversity runtime is : {((datetime.datetime.now()-begin).microseconds)/1000}ms"
-
-    def make_anonymous(self, dataframe, columns_k: list, column_l: str, k: int, l: int):
-        self.k_anonymous(dataframe, columns_k, k)
-        self.l_diversity(column_l, columns_k, l)
+from func.geopandas import geopandas_dataviz
+import datetime
 
 if __name__ == '__main__':
-    data=[[75015, 'H', 75, 'diabete'],
-          [92100, 'F', 60, 'cancer'],
-          [75015, 'H', 60, 'cancer'],
-          [75015, 'F', 68, 'cancer'],
-          [75016, 'F', 84, 'cancer'],
-          [75015, 'H', 72, 'asthma'],
-          [75014, 'F', 74, 'asthma'],
-          [92100, 'F', 60, 'cancer'],
-          [92100, 'H', 68, 'cancer'],
-          [92100, 'F', 55, 'cancer'],
-          [46140, 'H', 94, 'diabete'],
-          [77300, 'H', 68, 'diabete']]
-    df = pd.DataFrame(data=data, columns=['department', 'gender', 'weight', 'comorbidities'])
-    results = anonymous()
-    results.make_anonymous(dataframe=df, columns_k=['department', 'gender'], column_l='comorbidities', k=3, l=2)
-    print(results.df_k)
-    print(results.df_l)
+
+    study_day = datetime.date(2021,2,26)
+
+    df = pd.read_csv("data/donnees-hospitalieres-covid19-2021-03-29-18h03.csv", sep=";", parse_dates=['jour'])
+    df['jour_date'] = df.jour.dt.date
+    df_groupby = df.groupby(by=['dep', 'jour_date']).sum().reset_index()
+    df_day = df_groupby.loc[df_groupby.jour_date==study_day]
+    df_day = df_day.set_index('dep')
+
+    sidep = pd.read_csv("data/sp-pe-tb-quot-dep-2021-03-29-18h20.csv", sep=";", parse_dates=['jour'], low_memory=False)
+    sidep['jour_date'] = sidep.jour.dt.date
+    sidep_day = sidep.loc[sidep.jour_date==study_day].groupby(by=['dep']).sum()
+
+    merged_data = pd.merge(df_day, sidep_day, left_index=True, right_index=True).reset_index()
+    merged_data['hospit_relative'] = merged_data.hosp.div(merged_data["pop"])*1000
+
+    #df = pd.read_csv('data/donnees-hospitalieres-nouveaux-covid19-2021-03-28-19h03.csv', sep=';')
+    viz = geopandas_dataviz(size=10, title=f'Hospitalisation pour 1000 habitants par département le {study_day.strftime("%d-%m-%Y")}')
+    viz.plot(dataframe=merged_data, groupby_column='dep', agg_func='sum', plot_column='hospit_relative', cmap='plasma', shrink=0.65)
