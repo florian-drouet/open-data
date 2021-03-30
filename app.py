@@ -4,7 +4,21 @@ import datetime
 
 if __name__ == '__main__':
 
-    study_day = datetime.date(2020,11,7)
+    input1 = input("Do you want to display data at a particular date ? [Y/N] ")
+    if input1.lower() == "y":
+        success = False
+        while success==False:
+            input2 = input("What is this date ? (DD/MM/YYYY) ")        
+            try:
+                study_day = datetime.datetime.strptime(input2, '%d/%m/%Y').date()
+                success = True
+            except:
+                print("Wrong date format, please try again.")
+                success = False
+    else:
+        study_day = datetime.date(2021,3,25)
+
+    #study_day = datetime.date(2020,11,7)
     data = prepare_data_hospit(study_day)
 
     viz = geopandas_dataviz(size=10, title=f'Hospitalisation pour 1000 habitants par département le {study_day.strftime("%d-%m-%Y")}')
