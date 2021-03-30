@@ -16,10 +16,11 @@ if __name__ == '__main__':
                 print("Wrong date format, please try again.")
                 success = False
     else:
+        # Fix-me : change to yesterday's date
         study_day = datetime.date(2021,3,25)
 
     #study_day = datetime.date(2020,11,7)
     data = prepare_data_hospit(study_day)
 
-    viz = geopandas_dataviz(size=10, title=f'Hospitalisation pour 1000 habitants par département le {study_day.strftime("%d-%m-%Y")}')
-    viz.plot(dataframe=data, plot_column='rea_relative', cmap='plasma', shrink=0.65)
+    viz = geopandas_dataviz(size=10, title=f'Hospitalisation Covid pour 10 000 habitants par département le {study_day.strftime("%d-%m-%Y")}')
+    viz.plot(dataframe=data, plot_column='hospit_relative', cmap='plasma', shrink=0.65)

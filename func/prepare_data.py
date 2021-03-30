@@ -9,10 +9,11 @@ def get_data_from_data_gouv():
     last_modified = os.stat('data/data_hospit.csv').st_mtime
     if datetime.fromtimestamp(last_modified).date() != datetime.today().date():
         try:
-            data_hospit = pd.read_csv('https://www.data.gouv.fr/fr/datasets/r/63352e38-d353-4b54-bfd1-f1b3ee1cabd7', sep=";", low_memory=False)
-            data_sidep = pd.read_csv('https://www.data.gouv.fr/fr/datasets/r/19a91d64-3cd3-42fc-9943-d635491a4d76', sep=";", low_memory=False)
+            data_hospit = pd.read_csv('https://www.data.gouv.fr/fr/datasets/r/63352e38-d353-4b54-bfd1-f1b3ee1cabd7', sep=";", parse_dates=['jour'], low_memory=False)
+            data_sidep = pd.read_csv('https://www.data.gouv.fr/fr/datasets/r/19a91d64-3cd3-42fc-9943-d635491a4d76', sep=";", parse_dates=['jour'], low_memory=False)
             data_hospit.to_csv('data/data_hospit.csv', sep=";")
             data_sidep.to_csv('data/data_sidep.csv', sep=";")
+            print("### Data successfully uploaded from data.gouv.fr ! ###")
         except:
             print("### Cannot reach data.gouv.fr server : use old tables ! ###")        
     else:
@@ -52,9 +53,9 @@ def prepare_data_hospit(study_day):
 
     # merging SPF and SIDEP dataframe
     merged_data = pd.merge(dataframe_day, sidep_day, left_index=True, right_index=True).reset_index()
-    # number of hospit and rea covid for a 1000 inhabitants
-    merged_data['hospit_relative'] = merged_data.hosp.div(merged_data["pop"])*1000
-    merged_data['rea_relative'] = merged_data.rea.div(merged_data["pop"])*1000
+    # number of hospit and rea covid for 10 000 inhabitants
+    merged_data['hospit_relative'] = merged_data.hosp.div(merged_data["pop"])*10000
+    merged_data['rea_relative'] = merged_data.rea.div(merged_data["pop"])*10000
     # set index department
     merged_data = merged_data.set_index('dep')
     return merged_data
