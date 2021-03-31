@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 success = False
     else:
         # Fix-me : change to yesterday's date
-        study_day = datetime.date(2021,3,25)
+        study_day = datetime.date.today() - datetime.timedelta(days=1)
 
     #study_day = datetime.date(2020,11,7)
     data = prepare_data_hospit(study_day)

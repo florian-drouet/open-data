@@ -1,6 +1,7 @@
 from datetime import datetime
-import os
 import pandas as pd
+import os
+
 
 def get_data_from_data_gouv():
     '''
@@ -44,6 +45,8 @@ def prepare_data_hospit(study_day):
 
     # converts from datetime to date
     data_sidep['jour_date'] = data_sidep.jour.dt.date
+    # filter on 0 to get directly the total number of inhabitants per department
+    data_sidep = data_sidep.loc[data_sidep["cl_age90"]==0]
     # filter on last available data, groupby and aggregate by sum
     if data_sidep.jour_date.iloc[-1] < study_day:
         day = data_sidep.jour_date.iloc[-1]
