@@ -1,6 +1,7 @@
 import geopandas
 import pandas as pd
 from matplotlib import pyplot as plt
+import plotly.express as px
 
 class geopandas_dataviz():
     '''
@@ -39,7 +40,7 @@ class geopandas_dataviz():
     
     def show_map(self, plot_column, shrink, idf, **kwargs):    
         if self.ax is None:
-            self.ax = plt.gca()    
+            self.ax = plt.gca()
 
         pd.merge(self.geojson_file, self.data, left_index=True, right_index=True).plot(column=plot_column, legend=True, ax=self.ax, legend_kwds={'shrink': shrink}, **kwargs)
         if idf==True:
@@ -50,8 +51,18 @@ class geopandas_dataviz():
         self.ax.axis('off')
         self.ax.set_facecolor('white')
         plt.show()
+
+    def show_map_plotly(self, plot_column):
+        data = pd.merge(self.geojson_file, self.data, left_index=True, right_index=True)
+        print(data)
+        fig = px.choropleth(data, geojson=data['geometry'], locations='nom', color=plot_column,
+                           color_continuous_scale="Viridis",
+                           labels={'unemp':'unemployment rate'}
+                          )
+        fig.show()
         
     def plot(self, dataframe, plot_column, shrink=0.7, idf=False, **kwargs):
         self.preprocess(dataframe, idf)
         self.define_figure()
-        self.show_map(plot_column, shrink, idf, **kwargs)
+        #self.show_map(plot_column, shrink, idf, **kwargs)
+        self.show_map_plotly(plot_column)
