@@ -35,7 +35,7 @@ class geopandas_dataviz():
     def define_figure(self):
         self.fig = plt.figure(figsize=(self.size, self.size))
         self.ax = plt.gca()
-        self.ax.set_title(self.title)
+        self.ax.set_title(self.title, fontsize=14)
     
     def show_map(self, plot_column, shrink, idf, **kwargs):    
         if self.ax is None:

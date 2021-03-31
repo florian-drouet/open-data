@@ -21,6 +21,5 @@ if __name__ == '__main__':
 
     #study_day = datetime.date(2020,11,7)
     data = prepare_data_hospit(study_day)
-
-    viz = geopandas_dataviz(size=10, title=f'Hospitalisation Covid pour 10 000 habitants par département le {study_day.strftime("%d-%m-%Y")}')
+    viz = geopandas_dataviz(size=10, title=f'Covid hospitalizations per 10000 inhabitants per department on {study_day.strftime("%d-%m-%Y")}')
     viz.plot(dataframe=data, plot_column='hospit_relative', cmap='plasma', shrink=0.65)
